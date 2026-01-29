@@ -72,11 +72,7 @@
       width:min(340px, 62vmin);
       height:auto;
       transform-style:preserve-3d;
-
-      /* Upright + 3D */
       transform: rotateX(var(--rx)) rotateY(var(--ry)) translateZ(0);
-
-      /* makes it feel thick */
       filter: none !important;
     }
 
@@ -133,6 +129,29 @@
     }
     @keyframes blink{ 50%{opacity:0} }
 
+    /* Photo overlay (shows on 3rd click) */
+    .photo{
+      position:fixed; inset:0;
+      display:grid; place-items:center;
+      z-index:6;
+      opacity:0;
+      transform: translateY(10px) scale(.98);
+      transition: opacity .45s ease, transform .45s ease;
+      pointer-events:none;
+    }
+    .photo.active{
+      opacity:1;
+      transform: translateY(0) scale(1);
+      pointer-events:auto;
+    }
+    .photo img{
+      width:min(560px, 86vmin);
+      height:auto;
+      border-radius:24px;
+      border:1px solid rgba(255,255,255,.14);
+      box-shadow: 0 28px 90px rgba(0,0,0,.55);
+    }
+
     /* HUD */
     .hud{
       position:fixed;
@@ -158,20 +177,11 @@
       box-shadow: 0 12px 40px rgba(0,0,0,.25);
     }
     .hint b{ color:#fff; }
-    .badge{
-      font-size: 12px;
-      color: rgba(255,255,255,.80);
-      background: rgba(0,0,0,.22);
-      border: 1px solid rgba(255,255,255,.10);
-      border-radius: 999px;
-      padding: 8px 12px;
-      backdrop-filter: blur(10px);
-    }
 
     /* Click layer */
     .clicklayer{
       position:fixed; inset:0;
-      z-index:4;
+      z-index:7; /* above photo so you can keep clicking to change */
       cursor:pointer;
     }
   </style>
@@ -184,27 +194,17 @@
     <div class="aura" aria-hidden="true"></div>
 
     <div class="heart-wrap" aria-hidden="true">
-
       <!-- thickness stack (subtle “depth”) -->
       <div class="heart-stack" id="stack">
-        <svg class="layer" style="--z:-28px; --o:.16" viewBox="0 0 512 512">
-          <use href="#H"></use>
-        </svg>
-        <svg class="layer" style="--z:-20px; --o:.18" viewBox="0 0 512 512">
-          <use href="#H"></use>
-        </svg>
-        <svg class="layer" style="--z:-12px; --o:.20" viewBox="0 0 512 512">
-          <use href="#H"></use>
-        </svg>
-        <svg class="layer" style="--z:-6px; --o:.22" viewBox="0 0 512 512">
-          <use href="#H"></use>
-        </svg>
+        <svg class="layer" style="--z:-28px; --o:.16" viewBox="0 0 512 512"><use href="#H"></use></svg>
+        <svg class="layer" style="--z:-20px; --o:.18" viewBox="0 0 512 512"><use href="#H"></use></svg>
+        <svg class="layer" style="--z:-12px; --o:.20" viewBox="0 0 512 512"><use href="#H"></use></svg>
+        <svg class="layer" style="--z:-6px; --o:.22" viewBox="0 0 512 512"><use href="#H"></use></svg>
       </div>
 
       <!-- main heart -->
       <svg class="heart" id="heart" viewBox="0 0 512 512" aria-label="3D glossy heart">
         <defs>
-          <!-- Base juicy gradient: deep red -> hot pink -->
           <radialGradient id="base" cx="35%" cy="22%" r="75%">
             <stop offset="0" stop-color="#ff8aa1"/>
             <stop offset="0.35" stop-color="#ff3a63"/>
@@ -212,14 +212,12 @@
             <stop offset="1" stop-color="#8a001f"/>
           </radialGradient>
 
-          <!-- Rim / edge shading -->
           <radialGradient id="rim" cx="50%" cy="70%" r="85%">
             <stop offset="0" stop-color="rgba(0,0,0,0)"/>
             <stop offset="0.7" stop-color="rgba(0,0,0,0.08)"/>
             <stop offset="1" stop-color="rgba(0,0,0,0.25)"/>
           </radialGradient>
 
-          <!-- Moving highlight (controlled by CSS vars --lx --ly) -->
           <radialGradient id="gloss" cx="var(--lx)" cy="var(--ly)" r="55%">
             <stop offset="0" stop-color="rgba(255,255,255,0.70)"/>
             <stop offset="0.22" stop-color="rgba(255,255,255,0.28)"/>
@@ -227,12 +225,10 @@
             <stop offset="1" stop-color="rgba(255,255,255,0)"/>
           </radialGradient>
 
-          <!-- Inner shadow for “căng mọng” depth -->
           <filter id="innerShadow" x="-30%" y="-30%" width="160%" height="160%">
             <feOffset dx="0" dy="10" />
             <feGaussianBlur stdDeviation="10" result="blur"/>
-            <feComposite in="blur" in2="SourceAlpha" operator="arithmetic"
-              k2="-1" k3="1" result="inner"/>
+            <feComposite in="blur" in2="SourceAlpha" operator="arithmetic" k2="-1" k3="1" result="inner"/>
             <feColorMatrix in="inner" type="matrix" values="
               0 0 0 0 0
               0 0 0 0 0
@@ -241,7 +237,6 @@
             <feComposite in2="SourceGraphic" operator="over"/>
           </filter>
 
-          <!-- Specular outer glow -->
           <filter id="softGlow" x="-40%" y="-40%" width="180%" height="180%">
             <feGaussianBlur stdDeviation="10" result="b"/>
             <feColorMatrix in="b" type="matrix" values="
@@ -255,24 +250,15 @@
             </feMerge>
           </filter>
 
-          <!-- Heart path symbol -->
           <symbol id="H" viewBox="0 0 512 512">
-            <!-- classic heart shape -->
             <path d="M256 471s-26-16-54-37c-78-58-154-126-154-217C48 128 112 72 184 72c40 0 70 18 72 20s32-20 72-20c72 0 136 56 136 145 0 91-76 159-154 217-28 21-54 37-54 37z"/>
           </symbol>
         </defs>
 
-        <!-- base -->
         <g filter="url(#softGlow)">
           <use href="#H" fill="url(#base)" filter="url(#innerShadow)"></use>
-
-          <!-- rim shading -->
           <use href="#H" fill="url(#rim)" opacity="0.85"></use>
-
-          <!-- glossy highlight -->
           <use href="#H" fill="url(#gloss)" opacity="0.85"></use>
-
-          <!-- extra “wet” streak -->
           <path d="M165 155c18-48 70-74 112-53 14 7 28 20 33 35 7 22-2 46-23 58-20 11-46 7-62-10-12-12-20-20-33-30-14-11-33-8-27 0z"
                 fill="rgba(255,255,255,0.22)" opacity="0.9"/>
         </g>
@@ -286,9 +272,13 @@
     </div>
   </div>
 
+  <!-- Photo overlay -->
+  <div class="photo" id="photoWrap" aria-hidden="true">
+    <img id="photoEl" alt="photo" />
+  </div>
+
   <div class="hud">
-    <div class="hint">
-    </div>
+    <div class="hint"></div>
   </div>
 
   <div class="clicklayer" id="clicklayer" title="Click"></div>
@@ -299,17 +289,18 @@
       const TEXT = "I luv youu, Pookie💕";
 
       // ===== Your photos (Google Drive) =====
-    // Using direct-view endpoint. Make sure files are shared: "Anyone with the link".
-    const PHOTOS = [
-      "https://drive.google.com/thumbnail?id=1_BgkxtUE8ZZ9LsUrwYgUNF6BFFQmUS0b&sz=w2000"
-    ];
-    let photoIndex = 0;
-      
+      // Recommend: share file "Anyone with the link"
+      // Use uc?export=view for stability
+      const PHOTOS = [
+        "https://drive.google.com/uc?export=view&id=1_BgkxtUE8ZZ9LsUrwYgUNF6BFFQmUS0b"
+      ];
+      let photoIndex = 0;
+
       // ===== PARTICLES: clean mode =====
-      let EMIT_RATE = 40;        // hearts/sec (gọn)
-      let BURST_1 = 90;          // first click burst
-      let BURST_2 = 140;         // second click burst
-      const MAX_PARTICLES = 900; // cap (đỡ rối)
+      let EMIT_RATE = 40;
+      let BURST_1 = 90;
+      let BURST_2 = 140;
+      const MAX_PARTICLES = 900;
 
       const GRAVITY = 760;
       const DRAG = 0.988;
@@ -322,11 +313,27 @@
       const typed = document.getElementById("typed");
       const clicklayer = document.getElementById("clicklayer");
 
+      const photoWrap = document.getElementById("photoWrap");
+      const photoEl = document.getElementById("photoEl");
+
+      // preload photos
+      PHOTOS.forEach(u => { const im = new Image(); im.src = u; });
+
+      function showPhoto(){
+        if(!PHOTOS.length) return;
+        photoEl.src = PHOTOS[photoIndex % PHOTOS.length];
+        photoIndex++;
+        photoWrap.classList.add("active");
+      }
+      function hidePhoto(){
+        photoWrap.classList.remove("active");
+        photoEl.removeAttribute("src");
+      }
+
       let DPR=1, W=0, H=0;
       let running=false;
       let tPrev=performance.now();
       let emitAcc=0;
-      let totalSpawned=0;
 
       const particles = new Array(MAX_PARTICLES);
       let pCount=0;
@@ -343,7 +350,7 @@
         master.gain.exponentialRampToValueAtTime(0.0001, t0 + 1.35);
         master.connect(audioCtx.destination);
 
-        const freqs = [523.25, 659.25, 783.99]; // C5 E5 G5
+        const freqs = [523.25, 659.25, 783.99];
         freqs.forEach((f, i) => {
           const osc = audioCtx.createOscillator();
           const gain = audioCtx.createGain();
@@ -364,7 +371,6 @@
           osc.stop(t0 + i*0.06 + 0.6);
         });
 
-        // tiny sparkle
         const dur = 0.16;
         const bufferSize = Math.floor(audioCtx.sampleRate * dur);
         const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
@@ -466,7 +472,6 @@
         p.sprite=sprites[(Math.random()*sprites.length)|0];
 
         if(pCount<MAX_PARTICLES) pCount++;
-        totalSpawned++;
       }
 
       function burst(x,y,n){ for(let i=0;i<n;i++) spawnOne(x,y); }
@@ -497,7 +502,6 @@
 
         ctx.clearRect(0,0,W,H);
 
-        // vignette
         const vg=ctx.createRadialGradient(W*0.5,H*0.45,80,W*0.5,H*0.5,Math.max(W,H)*0.85);
         vg.addColorStop(0,"rgba(0,0,0,0)");
         vg.addColorStop(1,"rgba(0,0,0,.26)");
@@ -510,7 +514,7 @@
 
           p.vx += (WIND*(0.2+Math.random()*0.4))*dt;
           p.vy += GRAVITY*dt;
-          p.vx *= DRAG; p.vy *= DRAG;
+          p.vx *= 0.988; p.vy *= 0.988;
 
           p.x += p.vx*dt;
           p.y += p.vy*dt;
@@ -542,51 +546,63 @@
 
       // ===== interaction =====
       let first=false;
+      let clickCount=0;
 
       function activate(e){
         loveChime();
+        clickCount++;
 
         const x=e?.clientX ?? W*0.5;
         const y=e?.clientY ?? H*0.5;
 
-        if(!first){
+        if(clickCount === 1){
           first=true;
           running=true;
           msg.classList.add("active");
           typewriter(TEXT, 34);
-          burst(x,y,BURST_1);
-          burst(W*0.5,H*0.49,BURST_1+40);
-        }else{
-          // nhẹ thêm, không overdrive quá mạnh
-          burst(x,y,BURST_2);
+          burst(x,y,90);
+          burst(W*0.5,H*0.49,130);
+          return;
+        }
+
+        if(clickCount === 3){
+          showPhoto();       // ✅ click 3 hiện ảnh
+          burst(x,y,140);
+          return;
+        }
+
+        // other clicks
+        burst(x,y,140);
+
+        // click 4+ đổi ảnh (nếu có nhiều ảnh)
+        if(clickCount > 3){
+          showPhoto();
         }
       }
 
       function reset(){
         running=false; first=false;
+        clickCount=0;
         msg.classList.remove("active");
         typed.textContent="";
-        pCount=0; totalSpawned=0; emitAcc=0;
-        badge.textContent="READY";
+        pCount=0; emitAcc=0;
+        hidePhoto();
       }
 
       clicklayer.addEventListener("click", activate);
       window.addEventListener("keydown", (ev)=>{ if(ev.key.toLowerCase()==="r") reset(); });
 
       // ===== 4D feel: light follows pointer (no spinning) =====
-      // Updates: --rx --ry (tiny tilt) + --lx --ly (specular highlight)
       const root = document.documentElement;
       window.addEventListener("pointermove", (ev)=>{
-        const nx = (ev.clientX / W) * 2 - 1; // -1..1
+        const nx = (ev.clientX / W) * 2 - 1;
         const ny = (ev.clientY / H) * 2 - 1;
 
-        // small tilt only (still “standing”)
         const rx = (10 + (-ny)*6).toFixed(2);
         const ry = (-12 + (nx)*8).toFixed(2);
         root.style.setProperty("--rx", rx+"deg");
         root.style.setProperty("--ry", ry+"deg");
 
-        // gloss position
         const lx = (35 + nx*12).toFixed(2);
         const ly = (22 + ny*10).toFixed(2);
         root.style.setProperty("--lx", lx+"%");
@@ -596,9 +612,3 @@
   </script>
 </body>
 </html>
-
-
-
-
-
-
