@@ -109,17 +109,6 @@
       transition: opacity .45s ease, transform .45s ease;
     }
     .msg.active{ opacity:1; transform: translateY(0); }
-
-    .card{
-      padding: 18px 22px;
-      border-radius: 22px;
-      background: rgba(255,255,255,.06);
-      border: 1px solid rgba(255,255,255,.12);
-      backdrop-filter: blur(12px);
-      box-shadow: 0 24px 80px rgba(0,0,0,.35);
-      text-align:center;
-      min-width: min(560px, 88vw);
-    }
     .headline{
       margin:0;
       font-weight: 950;
@@ -294,14 +283,11 @@
   <div class="msg" id="msg">
     <div class="card">
       <h1 class="headline"><span id="typed"></span><span class="caret"></span></h1>
-      <p class="sub">Click lần nữa để bắn nhẹ thêm. Nhấn <b>R</b> để reset.</p>
     </div>
   </div>
 
   <div class="hud">
     <div class="hint">
-      Tim “căng mọng” + highlight theo chuột (4D feel).<br>
-      <b>Click</b> để hiện “I luv youu, Pookie” + tim bay nhẹ + âm thanh.
     </div>
     <div class="badge" id="badge">READY</div>
   </div>
@@ -606,3 +592,4 @@
   </script>
 </body>
 </html>
+
