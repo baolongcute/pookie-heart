@@ -313,7 +313,6 @@
 
       const msg = document.getElementById("msg");
       const typed = document.getElementById("typed");
-      const badge = document.getElementById("badge");
       const clicklayer = document.getElementById("clicklayer");
 
       let DPR=1, W=0, H=0;
@@ -530,7 +529,6 @@
           }
         }
 
-        badge.textContent = running ? `LIVE • spawned: ${totalSpawned.toLocaleString()}` : "READY";
         requestAnimationFrame(step);
       }
       requestAnimationFrame(step);
@@ -591,6 +589,7 @@
   </script>
 </body>
 </html>
+
 
 
 
