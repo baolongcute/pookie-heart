@@ -3,15 +3,18 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Plush 3D Heart — Pookie</title>
+  <title>Plush 4D Heart — Pookie (Ring Fixed)</title>
+
   <style>
     :root{
       --bg0:#05060d; --bg1:#0b1020; --bg2:#1a0b18;
-      --txt:#fff; --muted:rgba(255,255,255,.75);
+      --txt:#fff;
 
-      /* parallax + light position (updated by JS) */
+      /* 4D rotation controlled by JS (inertia) */
       --rx: 10deg;
-      --ry: -12deg;
+      --ry: -10deg;
+
+      /* highlight position */
       --lx: 35%;
       --ly: 22%;
     }
@@ -30,8 +33,8 @@
       user-select:none;
     }
 
-    /* Canvas particles */
-    #fx{ position:fixed; inset:0; width:100%; height:100%; z-index:1; }
+    /* particles */
+    #fx{ position:fixed; inset:0; width:100%; height:100%; z-index:1; display:block; }
 
     .stage{
       position:fixed; inset:0;
@@ -45,9 +48,9 @@
       width:min(560px, 84vmin);
       height:min(560px, 84vmin);
       border-radius:50%;
-      background: radial-gradient(circle, rgba(255,45,85,.22), rgba(255,45,85,0) 62%);
+      background: radial-gradient(circle, rgba(255,45,85,.18), rgba(255,45,85,0) 62%);
       filter: blur(12px);
-      opacity:.95;
+      opacity:.88;
       animation: float 7s ease-in-out infinite;
     }
     @keyframes float{
@@ -55,127 +58,85 @@
       50%{ transform: translateY(-14px) scale(1.03); }
     }
 
-    /* 3D heart holder */
-    .heart-wrap{
-      position:relative;
-      width:min(420px, 70vmin);
-      height:min(420px, 70vmin);
-      display:grid;
-      place-items:center;
-      perspective: 1200px;
-      transform-style:preserve-3d;
-      pointer-events:none;
-    }
-
-    /* the "plump" heart */
-    .heart{
-      width:min(340px, 62vmin);
-      height:auto;
-      transform-style:preserve-3d;
-      transform: rotateX(var(--rx)) rotateY(var(--ry)) translateZ(0);
-      filter: none !important;
-    }
-
-    /* pseudo thickness: stack a few blurred duplicates behind */
-    .heart-stack{
+    /* Ring text */
+    .ring{
       position:absolute;
-      width:min(340px, 62vmin);
-      height:auto;
-      transform-style:preserve-3d;
-      transform: rotateX(var(--rx)) rotateY(var(--ry));
-      opacity:.55;
-      filter: blur(.2px);
-    }
-    .layer{
-      position:absolute;
-      inset:0;
-      transform: translateZ(var(--z));
-      opacity: var(--o);
-      filter: saturate(1.08) contrast(1.03);
-    }
-
-    /* Message overlay */
-    .msg{
-      position:fixed; inset:0;
-      display:grid; place-items:center;
-      z-index:5;
-      pointer-events:none;
-      opacity:0;
-      transform: translateY(8px);
-      transition: opacity .45s ease, transform .45s ease;
-    }
-    .msg.active{ opacity:1; transform: translateY(0); }
-    .headline{
-      margin:0;
-      font-weight: 950;
-      font-size: clamp(28px, 4.6vw, 52px);
-      letter-spacing: .2px;
-      text-shadow: none; /* removed */
-    }
-    .caret{
-      display:inline-block;
-      width: 10px;
-      height: 1.1em;
-      transform: translateY(2px);
-      border-left: 3px solid rgba(255,255,255,.9);
-      margin-left: 8px;
-      animation: blink .9s steps(2) infinite;
-    }
-    @keyframes blink{ 50%{opacity:0} }
-
-    /* Photo overlay (shows on 3rd click) */
-    .photo{
-      position:fixed; inset:0;
-      display:grid; place-items:center;
-      z-index:6;
-      opacity:0;
-      transform: translateY(10px) scale(.98);
-      transition: opacity .45s ease, transform .45s ease;
-      pointer-events:none;
-    }
-    .photo.active{
-      opacity:1;
-      transform: translateY(0) scale(1);
-      pointer-events:auto;
-    }
-    .photo img{
-      width:min(560px, 86vmin);
-      height:auto;
-      border-radius:24px;
-      border:1px solid rgba(255,255,255,.14);
-      box-shadow: none; /* removed */
-    }
-
-    /* HUD */
-    .hud{
-      position:fixed;
-      inset:auto 0 0 0;
-      padding: 18px 18px 22px;
-      display:flex;
-      align-items:flex-end;
-      justify-content:space-between;
-      gap:16px;
+      width:min(560px, 96vmin);
+      height:min(560px, 96vmin);
       z-index:3;
       pointer-events:none;
+      opacity:.92;
+      animation: ringSpin 20s linear infinite;
+      transform-origin: 50% 50%;
     }
-    .hint{
-      color: var(--muted);
-      font-size: 14px;
-      line-height: 1.25;
-      background: rgba(255,255,255,.06);
-      border: 1px solid rgba(255,255,255,.10);
-      backdrop-filter: blur(10px);
-      border-radius: 16px;
-      padding: 10px 12px;
-      max-width: 560px;
-      box-shadow: none; /* removed */
+    @keyframes ringSpin { to { transform: rotate(360deg); } }
+
+    .ring text{
+      font-weight: 850;              /* bớt dày để dễ đọc */
+      font-size: 18px;               /* giảm size */
+      fill: rgba(255,255,255,.82);
+      letter-spacing: .6px;          /* nhẹ thôi, không dồn chữ */
+      paint-order: stroke;
+      stroke: rgba(0,0,0,.18);
+      stroke-width: 2.2px;
+      stroke-linejoin: round;
     }
-    .hint b{ color:#fff; }
+
+    .heart-wrap{
+      position:relative;
+      width:min(440px, 76vmin);
+      height:min(440px, 76vmin);
+      display:grid;
+      place-items:center;
+      perspective: 1400px;
+      transform-style:preserve-3d;
+    }
+
+    /* ONE card that rotates (front/back) */
+    .heart-card{
+      position:relative;
+      width:min(360px, 64vmin);
+      height:min(360px, 64vmin);
+      transform-style:preserve-3d;
+      transform: rotateX(var(--rx)) rotateY(var(--ry));
+      filter:none !important; /* NO shadow */
+    }
+
+    .face{
+      position:absolute;
+      inset:0;
+      display:grid;
+      place-items:center;
+      transform-style:preserve-3d;
+      backface-visibility:hidden;
+    }
+    .face.back{ transform: rotateY(180deg); }
+
+    /* Fake thickness (colored layers behind) — NO blur, NO black */
+    .stack{
+      position:absolute;
+      inset:0;
+      transform-style:preserve-3d;
+      pointer-events:none;
+    }
+    .stack svg{ position:absolute; inset:0; transform-style:preserve-3d; }
+    .stack .l1{ transform: translateZ(-22px); opacity:.18; }
+    .stack .l2{ transform: translateZ(-15px); opacity:.16; }
+    .stack .l3{ transform: translateZ(-9px);  opacity:.14; }
+    .stack .l4{ transform: translateZ(-4px);  opacity:.12; }
+
+    .heart{
+      width:100%;
+      height:100%;
+      display:block;
+      transform-style:preserve-3d;
+      filter:none !important;
+    }
 
     /* Click layer */
     .clicklayer{
       position:fixed; inset:0;
-      z-index:7; /* above photo so you can keep clicking to change */
+      z-index:10;
       cursor:pointer;
     }
   </style>
@@ -187,106 +148,141 @@
   <div class="stage">
     <div class="aura" aria-hidden="true"></div>
 
+    <!-- Ring text -->
+    <svg class="ring" viewBox="0 0 500 500" aria-hidden="true">
+      <defs>
+        <path id="ringPath"
+          d="M250,250
+             m-200,0
+             a200,200 0 1,1 400,0
+             a200,200 0 1,1 -400,0"/>
+      </defs>
+
+      <text>
+        <textPath id="ringTextPath" href="#ringPath" startOffset="50%" text-anchor="middle"></textPath>
+      </text>
+    </svg>
+
     <div class="heart-wrap" aria-hidden="true">
-      <!-- thickness stack -->
-      <div class="heart-stack" id="stack">
-        <svg class="layer" style="--z:-28px; --o:.16" viewBox="0 0 512 512"><use href="#H"></use></svg>
-        <svg class="layer" style="--z:-20px; --o:.18" viewBox="0 0 512 512"><use href="#H"></use></svg>
-        <svg class="layer" style="--z:-12px; --o:.20" viewBox="0 0 512 512"><use href="#H"></use></svg>
-        <svg class="layer" style="--z:-6px; --o:.22" viewBox="0 0 512 512"><use href="#H"></use></svg>
+      <div class="heart-card" id="heartCard">
+        <!-- FRONT -->
+        <div class="face front">
+          <!-- thickness layers (colored, NOT black) -->
+          <div class="stack" aria-hidden="true">
+            <svg class="l1" viewBox="0 0 512 512">
+              <path d="M256 448l-35.3-32.4C118.1 312.2 48 246.5 48 169.5 48 107.5 98.5 64 160.5 64c33.5 0 66.4 15.6 87.5 40.3C269.1 79.6 302 64 335.5 64 397.5 64 448 107.5 448 169.5c0 77-70.1 142.7-172.7 246.1L256 448z"
+                    fill="rgba(255,31,75,.70)"/>
+            </svg>
+            <svg class="l2" viewBox="0 0 512 512">
+              <path d="M256 448l-35.3-32.4C118.1 312.2 48 246.5 48 169.5 48 107.5 98.5 64 160.5 64c33.5 0 66.4 15.6 87.5 40.3C269.1 79.6 302 64 335.5 64 397.5 64 448 107.5 448 169.5c0 77-70.1 142.7-172.7 246.1L256 448z"
+                    fill="rgba(200,0,45,.62)"/>
+            </svg>
+            <svg class="l3" viewBox="0 0 512 512">
+              <path d="M256 448l-35.3-32.4C118.1 312.2 48 246.5 48 169.5 48 107.5 98.5 64 160.5 64c33.5 0 66.4 15.6 87.5 40.3C269.1 79.6 302 64 335.5 64 397.5 64 448 107.5 448 169.5c0 77-70.1 142.7-172.7 246.1L256 448z"
+                    fill="rgba(140,0,30,.56)"/>
+            </svg>
+            <svg class="l4" viewBox="0 0 512 512">
+              <path d="M256 448l-35.3-32.4C118.1 312.2 48 246.5 48 169.5 48 107.5 98.5 64 160.5 64c33.5 0 66.4 15.6 87.5 40.3C269.1 79.6 302 64 335.5 64 397.5 64 448 107.5 448 169.5c0 77-70.1 142.7-172.7 246.1L256 448z"
+                    fill="rgba(90,0,20,.50)"/>
+            </svg>
+          </div>
+
+          <!-- main heart -->
+          <svg class="heart" viewBox="0 0 512 512" aria-label="Plush glossy heart (no shadow)">
+            <defs>
+              <radialGradient id="base" cx="35%" cy="22%" r="78%">
+                <stop offset="0" stop-color="#ff9ab0"/>
+                <stop offset="0.34" stop-color="#ff3a63"/>
+                <stop offset="0.72" stop-color="#ff1f4b"/>
+                <stop offset="1" stop-color="#7a001c"/>
+              </radialGradient>
+
+              <radialGradient id="rim" cx="50%" cy="74%" r="92%">
+                <stop offset="0" stop-color="rgba(0,0,0,0)"/>
+                <stop offset="0.72" stop-color="rgba(0,0,0,0.08)"/>
+                <stop offset="1" stop-color="rgba(0,0,0,0.22)"/>
+              </radialGradient>
+
+              <radialGradient id="gloss" cx="var(--lx)" cy="var(--ly)" r="56%">
+                <stop offset="0" stop-color="rgba(255,255,255,0.55)"/>
+                <stop offset="0.28" stop-color="rgba(255,255,255,0.20)"/>
+                <stop offset="0.62" stop-color="rgba(255,255,255,0.06)"/>
+                <stop offset="1" stop-color="rgba(255,255,255,0)"/>
+              </radialGradient>
+
+              <filter id="innerShadow" x="-30%" y="-30%" width="160%" height="160%">
+                <feOffset dx="0" dy="10" />
+                <feGaussianBlur stdDeviation="10" result="blur"/>
+                <feComposite in="blur" in2="SourceAlpha" operator="arithmetic" k2="-1" k3="1" result="inner"/>
+                <feColorMatrix in="inner" type="matrix" values="
+                  0 0 0 0 0
+                  0 0 0 0 0
+                  0 0 0 0 0
+                  0 0 0 0.55 0" />
+                <feComposite in2="SourceGraphic" operator="over"/>
+              </filter>
+
+              <path id="H"
+                d="M256 448l-35.3-32.4C118.1 312.2 48 246.5 48 169.5 48 107.5 98.5 64 160.5 64c33.5 0 66.4 15.6 87.5 40.3C269.1 79.6 302 64 335.5 64 397.5 64 448 107.5 448 169.5c0 77-70.1 142.7-172.7 246.1L256 448z"/>
+            </defs>
+
+            <g>
+              <use href="#H" fill="url(#base)" filter="url(#innerShadow)"></use>
+              <use href="#H" fill="url(#rim)" opacity="0.95"></use>
+              <use href="#H" fill="url(#gloss)" opacity="0.92"></use>
+              <ellipse cx="205" cy="165" rx="70" ry="48"
+                       fill="rgba(255,255,255,0.08)" transform="rotate(-18 205 165)"/>
+            </g>
+          </svg>
+        </div>
+
+        <!-- BACK (photo inside heart) -->
+        <div class="face back">
+          <svg class="heart" viewBox="0 0 512 512" aria-label="Back side photo">
+            <defs>
+              <path id="HB"
+                d="M256 448l-35.3-32.4C118.1 312.2 48 246.5 48 169.5 48 107.5 98.5 64 160.5 64c33.5 0 66.4 15.6 87.5 40.3C269.1 79.6 302 64 335.5 64 397.5 64 448 107.5 448 169.5c0 77-70.1 142.7-172.7 246.1L256 448z"/>
+              <clipPath id="clipHeart">
+                <use href="#HB"></use>
+              </clipPath>
+
+              <radialGradient id="backShade" cx="50%" cy="75%" r="90%">
+                <stop offset="0" stop-color="rgba(0,0,0,0)"/>
+                <stop offset="1" stop-color="rgba(0,0,0,0.22)"/>
+              </radialGradient>
+            </defs>
+
+            <g clip-path="url(#clipHeart)">
+              <image id="backPhoto"
+                     href=""
+                     x="48" y="64" width="416" height="416"
+                     preserveAspectRatio="xMidYMid slice"></image>
+              <rect x="0" y="0" width="512" height="512" fill="rgba(255,35,85,0.10)"></rect>
+            </g>
+
+            <use href="#HB" fill="none" stroke="rgba(255,255,255,0.18)" stroke-width="10"></use>
+            <use href="#HB" fill="url(#backShade)" opacity="0.9"></use>
+          </svg>
+        </div>
       </div>
-
-      <!-- main heart -->
-      <svg class="heart" id="heart" viewBox="0 0 512 512" aria-label="3D glossy heart">
-        <defs>
-          <radialGradient id="base" cx="35%" cy="22%" r="75%">
-            <stop offset="0" stop-color="#ff8aa1"/>
-            <stop offset="0.35" stop-color="#ff3a63"/>
-            <stop offset="0.72" stop-color="#ff1f4b"/>
-            <stop offset="1" stop-color="#8a001f"/>
-          </radialGradient>
-
-          <radialGradient id="rim" cx="50%" cy="70%" r="85%">
-            <stop offset="0" stop-color="rgba(0,0,0,0)"/>
-            <stop offset="0.7" stop-color="rgba(0,0,0,0.08)"/>
-            <stop offset="1" stop-color="rgba(0,0,0,0.25)"/>
-          </radialGradient>
-
-          <radialGradient id="gloss" cx="var(--lx)" cy="var(--ly)" r="55%">
-            <stop offset="0" stop-color="rgba(255,255,255,0.70)"/>
-            <stop offset="0.22" stop-color="rgba(255,255,255,0.28)"/>
-            <stop offset="0.52" stop-color="rgba(255,255,255,0.08)"/>
-            <stop offset="1" stop-color="rgba(255,255,255,0)"/>
-          </radialGradient>
-
-          <filter id="innerShadow" x="-30%" y="-30%" width="160%" height="160%">
-            <feOffset dx="0" dy="10" />
-            <feGaussianBlur stdDeviation="10" result="blur"/>
-            <feComposite in="blur" in2="SourceAlpha" operator="arithmetic" k2="-1" k3="1" result="inner"/>
-            <feColorMatrix in="inner" type="matrix" values="
-              0 0 0 0 0
-              0 0 0 0 0
-              0 0 0 0 0
-              0 0 0 0.55 0" />
-            <feComposite in2="SourceGraphic" operator="over"/>
-          </filter>
-
-          <filter id="softGlow" x="-40%" y="-40%" width="180%" height="180%">
-            <feGaussianBlur stdDeviation="10" result="b"/>
-            <feColorMatrix in="b" type="matrix" values="
-              1 0 0 0 0
-              0 0.2 0 0 0
-              0 0 0.3 0 0
-              0 0 0 0.55 0" result="c"/>
-            <feMerge>
-              <feMergeNode in="c"/>
-              <feMergeNode in="SourceGraphic"/>
-            </feMerge>
-          </filter>
-
-          <symbol id="H" viewBox="0 0 512 512">
-            <path d="M256 471s-26-16-54-37c-78-58-154-126-154-217C48 128 112 72 184 72c40 0 70 18 72 20s32-20 72-20c72 0 136 56 136 145 0 91-76 159-154 217-28 21-54 37-54 37z"/>
-          </symbol>
-        </defs>
-
-        <g filter="url(#softGlow)">
-          <use href="#H" fill="url(#base)" filter="url(#innerShadow)"></use>
-          <use href="#H" fill="url(#rim)" opacity="0.85"></use>
-          <use href="#H" fill="url(#gloss)" opacity="0.85"></use>
-          <path d="M165 155c18-48 70-74 112-53 14 7 28 20 33 35 7 22-2 46-23 58-20 11-46 7-62-10-12-12-20-20-33-30-14-11-33-8-27 0z"
-                fill="rgba(255,255,255,0.22)" opacity="0.9"/>
-        </g>
-      </svg>
     </div>
-  </div>
-
-  <div class="msg" id="msg">
-    <div class="card">
-      <h1 class="headline"><span id="typed"></span><span class="caret"></span></h1>
-    </div>
-  </div>
-
-  <div class="photo" id="photoWrap" aria-hidden="true">
-    <img id="photoEl" alt="photo" />
-  </div>
-
-  <div class="hud">
-    <div class="hint"></div>
   </div>
 
   <div class="clicklayer" id="clicklayer" title="Click"></div>
 
   <script>
     (() => {
-      const TEXT = "I luv youu, Pookie💕";
+      // ====== CONFIG ======
+      const RING_PHRASE = "I luvv youu, Pookie 💕";
+      const MAX_REPS = 6;           // ✅ bớt layer chữ: giảm con số này (3–5 là đẹp)
+      const FILL_MIN = 0.86;        // textLength chỉ giãn spacing nhẹ
+      const FILL_MAX = 0.98;
 
-      // Share Drive file: "Anyone with the link"
-      const PHOTOS = [
-        "https://drive.google.com/uc?export=view&id=1_BgkxtUE8ZZ9LsUrwYgUNF6BFFQmUS0b"
-      ];
-      let photoIndex = 0;
+      const PHOTO_URL =
+        "https://drive.google.com/thumbnail?id=1RPVOLibNCCMzcZcpDfgCvbqEka_8u-xA&sz=w2400";
 
-      let EMIT_RATE = 40;
+      // particles
+      let EMIT_RATE = 34;
       let BURST_1 = 90;
       let BURST_2 = 140;
       const MAX_PARTICLES = 900;
@@ -295,93 +291,48 @@
       const DRAG = 0.988;
       const WIND = 10;
 
+      // ====== DOM ======
       const canvas = document.getElementById("fx");
       const ctx = canvas.getContext("2d", { alpha: true });
-
-      const msg = document.getElementById("msg");
-      const typed = document.getElementById("typed");
       const clicklayer = document.getElementById("clicklayer");
+      const root = document.documentElement;
 
-      const photoWrap = document.getElementById("photoWrap");
-      const photoEl = document.getElementById("photoEl");
+      const ringPath = document.getElementById("ringPath");
+      const ringTextPath = document.getElementById("ringTextPath");
+      const backPhoto = document.getElementById("backPhoto");
 
-      // preload photos
-      PHOTOS.forEach(u => { const im = new Image(); im.src = u; });
+      backPhoto.setAttribute("href", PHOTO_URL);
 
-      function showPhoto(){
-        if(!PHOTOS.length) return;
-        photoEl.src = PHOTOS[photoIndex % PHOTOS.length];
-        photoIndex++;
-        photoWrap.classList.add("active");
-      }
-      function hidePhoto(){
-        photoWrap.classList.remove("active");
-        photoEl.removeAttribute("src");
-      }
+      // ====== ring text: auto pick repetitions to avoid overlap ======
+      function fitRingText(){
+        const pathLen = ringPath.getTotalLength();
 
-      let DPR=1, W=0, H=0;
-      let running=false;
-      let tPrev=performance.now();
-      let emitAcc=0;
+        let reps = 1;
+        ringTextPath.textContent = RING_PHRASE.repeat(reps).trim();
 
-      const particles = new Array(MAX_PARTICLES);
-      let pCount=0;
+        // wait a frame so SVG has layout
+        requestAnimationFrame(() => {
+          // grow until text is close but still <= circle
+          while (reps < MAX_REPS && ringTextPath.getComputedTextLength() < pathLen * FILL_MIN) {
+            reps++;
+            ringTextPath.textContent = RING_PHRASE.repeat(reps).trim();
+          }
+          // if overshoot (rare), step back
+          while (reps > 1 && ringTextPath.getComputedTextLength() > pathLen * FILL_MAX) {
+            reps--;
+            ringTextPath.textContent = RING_PHRASE.repeat(reps).trim();
+          }
 
-      // ===== Love sound =====
-      let audioCtx = null;
-      function loveChime(){
-        if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        const t0 = audioCtx.currentTime;
-
-        const master = audioCtx.createGain();
-        master.gain.setValueAtTime(0.0001, t0);
-        master.gain.exponentialRampToValueAtTime(0.22, t0 + 0.02);
-        master.gain.exponentialRampToValueAtTime(0.0001, t0 + 1.35);
-        master.connect(audioCtx.destination);
-
-        const freqs = [523.25, 659.25, 783.99];
-        freqs.forEach((f, i) => {
-          const osc = audioCtx.createOscillator();
-          const gain = audioCtx.createGain();
-          const filt = audioCtx.createBiquadFilter();
-          osc.type = "sine";
-          osc.frequency.setValueAtTime(f, t0 + i*0.06);
-
-          gain.gain.setValueAtTime(0.0001, t0 + i*0.06);
-          gain.gain.exponentialRampToValueAtTime(0.18, t0 + i*0.06 + 0.01);
-          gain.gain.exponentialRampToValueAtTime(0.0001, t0 + i*0.06 + 0.55);
-
-          filt.type = "lowpass";
-          filt.frequency.setValueAtTime(2400, t0);
-          filt.Q.value = 0.75;
-
-          osc.connect(filt); filt.connect(gain); gain.connect(master);
-          osc.start(t0 + i*0.06);
-          osc.stop(t0 + i*0.06 + 0.6);
+          // set textLength to gently distribute spacing (NOT compress hard)
+          ringTextPath.setAttribute("textLength", pathLen.toFixed(2));
+          ringTextPath.setAttribute("lengthAdjust", "spacing");
         });
-
-        const dur = 0.16;
-        const bufferSize = Math.floor(audioCtx.sampleRate * dur);
-        const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
-        const data = buffer.getChannelData(0);
-        for(let i=0;i<bufferSize;i++){
-          data[i] = (Math.random()*2-1) * Math.pow(1 - i/bufferSize, 2);
-        }
-        const noise = audioCtx.createBufferSource(); noise.buffer = buffer;
-
-        const ng = audioCtx.createGain();
-        ng.gain.setValueAtTime(0.0001, t0);
-        ng.gain.exponentialRampToValueAtTime(0.06, t0 + 0.01);
-        ng.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
-
-        const hp = audioCtx.createBiquadFilter();
-        hp.type = "highpass"; hp.frequency.value = 2600;
-
-        noise.connect(hp); hp.connect(ng); ng.connect(master);
-        noise.start(t0 + 0.02);
-        noise.stop(t0 + 0.02 + dur);
       }
+      fitRingText();
+      window.addEventListener("resize", fitRingText);
 
+      // ====== resize ======
+      let DPR=1, W=0, H=0;
       function resize(){
         DPR = Math.min(2, window.devicePixelRatio || 1);
         canvas.width  = Math.floor(window.innerWidth * DPR);
@@ -395,13 +346,14 @@
       window.addEventListener("resize", resize);
       resize();
 
-      // ===== Heart sprite for particles (NO shadows) =====
+      // ====== particles (NO shadow) ======
       const sprites=[];
       function makeHeartSprite(size){
         const c=document.createElement("canvas");
         c.width=c.height=size;
         const g=c.getContext("2d");
         g.clearRect(0,0,size,size);
+
         const cx=size/2, cy=size/2;
         const s=size/36;
 
@@ -415,11 +367,8 @@
         grad.addColorStop(0.55,"rgba(255,45,85,0.95)");
         grad.addColorStop(1,"rgba(180,0,45,0.95)");
 
-        // explicitly disable any shadow
         g.shadowColor="transparent";
-        g.shadowBlur=0;
-        g.shadowOffsetX=0;
-        g.shadowOffsetY=0;
+        g.shadowBlur=0; g.shadowOffsetX=0; g.shadowOffsetY=0;
 
         g.beginPath();
         g.moveTo(16,29);
@@ -443,6 +392,9 @@
       }
       [18,22,26,32].forEach(sz=>sprites.push(makeHeartSprite(sz)));
 
+      const particles = new Array(MAX_PARTICLES);
+      let pCount=0;
+
       function clamp(v,a,b){ return Math.max(a, Math.min(b, v)); }
 
       function spawnOne(x,y){
@@ -465,16 +417,80 @@
 
         if(pCount<MAX_PARTICLES) pCount++;
       }
-
       function burst(x,y,n){ for(let i=0;i<n;i++) spawnOne(x,y); }
 
-      async function typewriter(text, ms=38){
-        typed.textContent="";
-        for(let i=0;i<text.length;i++){
-          typed.textContent += text[i];
-          await new Promise(r=>setTimeout(r,ms));
-        }
+      // ====== sound ======
+      let audioCtx = null;
+      function loveChime(){
+        if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const t0 = audioCtx.currentTime;
+
+        const master = audioCtx.createGain();
+        master.gain.setValueAtTime(0.0001, t0);
+        master.gain.exponentialRampToValueAtTime(0.22, t0 + 0.02);
+        master.gain.exponentialRampToValueAtTime(0.0001, t0 + 1.15);
+        master.connect(audioCtx.destination);
+
+        const freqs = [523.25, 659.25, 783.99];
+        freqs.forEach((f, i) => {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          const filt = audioCtx.createBiquadFilter();
+          osc.type = "sine";
+          osc.frequency.setValueAtTime(f, t0 + i*0.06);
+
+          gain.gain.setValueAtTime(0.0001, t0 + i*0.06);
+          gain.gain.exponentialRampToValueAtTime(0.18, t0 + i*0.06 + 0.01);
+          gain.gain.exponentialRampToValueAtTime(0.0001, t0 + i*0.06 + 0.55);
+
+          filt.type = "lowpass";
+          filt.frequency.setValueAtTime(2400, t0);
+          filt.Q.value = 0.75;
+
+          osc.connect(filt); filt.connect(gain); gain.connect(master);
+          osc.start(t0 + i*0.06);
+          osc.stop(t0 + i*0.06 + 0.6);
+        });
       }
+
+      // ====== 4D “swipe spin” (NOT cursor-follow position) ======
+      let spin = -10;
+      let spinV = 0;
+      let flipCur = 0;
+      let flipTarget = 0;
+
+      let lastX = null;
+      window.addEventListener("pointermove", (ev)=>{
+        if(lastX == null){ lastX = ev.clientX; return; }
+        const dx = ev.clientX - lastX;
+        lastX = ev.clientX;
+
+        spinV += dx * 0.045;
+        spinV = clamp(spinV, -6, 6);
+      }, {passive:true});
+      window.addEventListener("pointerleave", ()=>{ lastX = null; });
+
+      function apply4D(){
+        spinV *= 0.90;
+        spin += spinV;
+        flipCur += (flipTarget - flipCur) * 0.12;
+
+        const ry = spin + flipCur;
+        root.style.setProperty("--rx", "10deg");
+        root.style.setProperty("--ry", ry.toFixed(2) + "deg");
+
+        const nx = Math.sin(ry * Math.PI/180);
+        const ny = Math.cos(ry * Math.PI/180);
+        const lx = 35 + nx * 14;
+        const ly = 22 + ny * 8;
+        root.style.setProperty("--lx", lx.toFixed(2) + "%");
+        root.style.setProperty("--ly", ly.toFixed(2) + "%");
+      }
+
+      // ====== render loop ======
+      let running = false;
+      let tPrev = performance.now();
+      let emitAcc = 0;
 
       function step(now){
         const dt=Math.min(0.035, (now-tPrev)/1000);
@@ -492,7 +508,6 @@
 
         ctx.clearRect(0,0,W,H);
 
-        // vignette only (no shadow)
         const vg=ctx.createRadialGradient(W*0.5,H*0.45,80,W*0.5,H*0.5,Math.max(W,H)*0.85);
         vg.addColorStop(0,"rgba(0,0,0,0)");
         vg.addColorStop(1,"rgba(0,0,0,.26)");
@@ -531,71 +546,52 @@
           }
         }
 
+        apply4D();
         requestAnimationFrame(step);
       }
       requestAnimationFrame(step);
 
-      let first=false;
-      let clickCount=0;
+      // ====== click interactions ======
+      let clickCount = 0;
+      let clickTimer = null;
 
-      function activate(e){
+      function onClick(e){
         loveChime();
-        clickCount++;
 
         const x=e?.clientX ?? W*0.5;
         const y=e?.clientY ?? H*0.5;
 
-        if(clickCount === 1){
-          first=true;
-          running=true;
-          msg.classList.add("active");
-          typewriter(TEXT, 34);
+        if(!running){
+          running = true;
           burst(x,y,BURST_1);
           burst(W*0.5,H*0.49,BURST_1+40);
-          return;
+        } else {
+          burst(x,y,BURST_2);
         }
+
+        clickCount++;
+        clearTimeout(clickTimer);
+        clickTimer = setTimeout(()=>{ clickCount = 0; }, 700);
 
         if(clickCount === 3){
-          showPhoto();
-          burst(x,y,BURST_2);
-          return;
-        }
-
-        burst(x,y,BURST_2);
-
-        if(clickCount > 3){
-          showPhoto();
+          clickCount = 0;
+          flipTarget = (flipTarget < 90) ? 180 : 0;
         }
       }
 
-      function reset(){
-        running=false; first=false;
-        clickCount=0;
-        msg.classList.remove("active");
-        typed.textContent="";
-        pCount=0; emitAcc=0;
-        hidePhoto();
-      }
+      clicklayer.addEventListener("click", onClick);
 
-      clicklayer.addEventListener("click", activate);
-      window.addEventListener("keydown", (ev)=>{ if(ev.key.toLowerCase()==="r") reset(); });
-
-      // light follows pointer
-      const root = document.documentElement;
-      window.addEventListener("pointermove", (ev)=>{
-        const nx = (ev.clientX / W) * 2 - 1;
-        const ny = (ev.clientY / H) * 2 - 1;
-
-        const rx = (10 + (-ny)*6).toFixed(2);
-        const ry = (-12 + (nx)*8).toFixed(2);
-        root.style.setProperty("--rx", rx+"deg");
-        root.style.setProperty("--ry", ry+"deg");
-
-        const lx = (35 + nx*12).toFixed(2);
-        const ly = (22 + ny*10).toFixed(2);
-        root.style.setProperty("--lx", lx+"%");
-        root.style.setProperty("--ly", ly+"%");
-      }, {passive:true});
+      window.addEventListener("keydown", (ev)=>{
+        const k = ev.key.toLowerCase();
+        if(k === "r"){
+          running = false;
+          pCount = 0;
+          emitAcc = 0;
+          spinV = 0;
+          flipTarget = 0;
+          flipCur = 0;
+        }
+      });
     })();
   </script>
 </body>
